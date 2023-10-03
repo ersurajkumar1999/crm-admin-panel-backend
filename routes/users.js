@@ -1,7 +1,7 @@
+const { createNewUser } = require("../controllers/UserController");
+
 const router = require("express").Router();
 
-router.post("/api/register", (req, res) => {
-  res.send("Let's build a CRUD API!"+req.body ?.name);
-});
+router.post("/api/register", createNewUser);
 
 module.exports = router;
