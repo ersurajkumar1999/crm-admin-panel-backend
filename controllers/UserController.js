@@ -78,6 +78,6 @@ exports.userLogin = async (req, res) => {
     );
     checkUserExists.token = "Bearer " + token;
 
-    return res.status(200).json(checkUserExists);
+    return res.status(200).json({status: true, data: checkUserExists, message: "Login Successfully!"});
 }
 
