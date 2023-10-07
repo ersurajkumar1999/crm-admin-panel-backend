@@ -12,7 +12,8 @@ exports.createNewUser = async (req, res) => {
     if (!isValid) {
         return res.status(400).json({ errors: errors, status: false });
     }
-    const { name, email, password } = req.body;
+    const { first_name, last_name, email, password } = req.body;
+    console.log(first_name, last_name)
     const checkUserExists = await userServices.findUserByEmail(email);
     if (checkUserExists) {
         return res.status(400).json({ status: false, message: "Email is already registered!" });
@@ -20,7 +21,9 @@ exports.createNewUser = async (req, res) => {
     const pass = await helperPassword.hashedPassword(password);
     try {
         const userInfo = {
-            name: name,
+            first_name: first_name,
+            last_name: last_name,
+            full_name: first_name + " " + last_name,
             email: email,
             password: pass,
             accountType: "User"
@@ -41,7 +44,7 @@ exports.createNewUser = async (req, res) => {
 
         res.json({ data: user, status: true });
     } catch (error) {
-        res.status(500).json({ error: error });
+        res.status(500).json({ error: error, status:false });
     }
 }
 
@@ -78,6 +81,24 @@ exports.userLogin = async (req, res) => {
     );
     checkUserExists.token = "Bearer " + token;
 
-    return res.status(200).json({status: true, data: checkUserExists, message: "Login Successfully!"});
+    return res.status(200).json({ status: true, data: checkUserExists, message: "Login Successfully!" });
+}
+
+exports.getUserById = async (req, res) => {
+    if (!req.user?.id) {
+        return res.status(401).json({
+            success: true,
+            message: "Something went wrong while validating the token!"
+        })
+    }
+    try {
+
+        // Check if User Exists or Not
+        const user = await userServices.findUserById(req.user.id);
+
+        res.json({ data: user, status: true });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 }
 
