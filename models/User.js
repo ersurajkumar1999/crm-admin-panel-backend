@@ -30,7 +30,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         enum: ["Admin", "User"],
     },
-    date: {
+    createdAt: {
+        type: String,
+        default: Date.now,
+    },
+    updatedAt: {
         type: String,
         default: Date.now,
     },

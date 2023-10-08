@@ -16,3 +16,13 @@ exports.findUserById = async (userId) => {
     }
     return user;
 }
+exports.getAllUsers = async (skip, perPage) => {
+    return await userModel.find()
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(perPage)
+        .exec();
+}
+exports.countTotalUsers = async () => {
+    return await userModel.countDocuments();
+}

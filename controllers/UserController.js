@@ -1,10 +1,10 @@
+const jwt = require("jsonwebtoken");
 const userServices = require('../services/UserServices');
 const profileService = require('../services/profileService');
 const validateRegisterInput = require("../validation/register");
 const validateLoginInput = require('../validation/login');
 const helperPassword = require('../helpers/Password');
-const jwt = require("jsonwebtoken");
-
+const User = require('../models/User');
 exports.createNewUser = async (req, res) => {
     // Form validation
     const { errors, isValid } = validateRegisterInput(req.body);
@@ -44,7 +44,7 @@ exports.createNewUser = async (req, res) => {
 
         res.json({ data: user, status: true });
     } catch (error) {
-        res.status(500).json({ error: error, status:false });
+        res.status(500).json({ error: error, status: false });
     }
 }
 
@@ -99,6 +99,65 @@ exports.getUserById = async (req, res) => {
         res.json({ data: user, status: true });
     } catch (err) {
         res.status(500).json({ error: err.message });
+    }
+}
+
+exports.getAllUsers = async (req, res, next) => {
+    try {
+        let { page, size, sort } = req.query;
+
+        // If the page is not applied in query. 
+        if (!page) {
+
+            // Make the Default value one. 
+            page = 1;
+        }
+
+        if (!size) {
+            size = 100;
+        }
+
+        //  We have to make it integer because 
+        // query parameter passed is string 
+        const limit = parseInt(size);
+
+        // We pass 1 for sorting data in  
+        // ascending order using ids 
+        const user = await userServices.findUserById(req.user.id);
+        res.send({
+            page,
+            size,
+            Info: user,
+        });
+    }
+    catch (error) {
+        res.sendStatus(500);
+    }
+
+}
+exports.getMynetwork = async (req, res) => {
+    try {
+        // Define the pagination parameters (usually received from the request)
+        const page = req.body.page || 1; // Current page number, default to 1
+        const perPage = req.body.perPage || 10; // Number of items per page, default to 10
+
+        // Calculate the skip value based on the current page and perPage
+        const skip = (page - 1) * perPage;
+        const users = await userServices.getAllUsers(skip, perPage);
+        // Return the paginated result along with total count
+        const totalUsers = await userServices.countTotalUsers();
+
+        res.json({
+            data: users,
+            status: true,
+            message: "Get All Users!",
+            page: page,
+            perPage: perPage,
+            total: totalUsers
+        });
+    }
+    catch (error) {
+        res.status(500).json({ error: error });
     }
 }
 
